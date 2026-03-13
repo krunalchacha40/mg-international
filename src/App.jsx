@@ -204,8 +204,16 @@ export default function App() {
     setSaving(false);
   };
 
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
+
+  useEffect(() => {
+    const handle = () => setIsDesktop(window.innerWidth >= 768);
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
+  }, []);
+
   return (
-    <div style={{ fontFamily: "'DM Sans',sans-serif", background: "#0c0c11", minHeight: "100vh", color: "#e4e2ef", maxWidth: 480, margin: "0 auto" }}>
+    <div style={{ fontFamily: "'DM Sans',sans-serif", background: "#0c0c11", minHeight: "100vh", color: "#e4e2ef" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap');
         *{box-sizing:border-box;margin:0;padding:0}
@@ -218,13 +226,17 @@ export default function App() {
         .pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600}
         .pbar{height:5px;background:#1e1e2c;border-radius:99px;overflow:hidden;margin-top:7px}
         .pfill{height:100%;border-radius:99px;transition:width .4s}
-        .sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#0f0f18;border-top:1px solid #1e1e2c;border-radius:20px 20px 0 0;padding:18px 16px 46px;z-index:100}
+        .sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:#0f0f18;border-top:1px solid #1e1e2c;border-radius:20px 20px 0 0;padding:18px 16px 46px;z-index:100}
+        @media(min-width:768px){
+          .sheet{left:50%;max-width:560px;border-radius:16px;bottom:auto;top:50%;transform:translate(-50%,-50%);border:1px solid #26263a;box-shadow:0 24px 80px rgba(0,0,0,.7)}
+        }
         .overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99}
         .btn{background:linear-gradient(135deg,#7c6af7,#a78bfa);color:#fff;border:none;border-radius:11px;padding:13px;font-size:14px;font-weight:700;width:100%;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .15s}
         .btn:disabled{opacity:.5;cursor:not-allowed}
         .chip{background:#181820;border:1.5px solid #26263a;border-radius:999px;padding:5px 13px;font-size:12px;font-weight:600;color:#555;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif}
         .chip.on{background:linear-gradient(135deg,#7c6af7,#a78bfa);border-color:transparent;color:#fff}
         .g2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+        .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
         .row{display:flex;gap:8px}
         .sbox{background:#13131e;border:1px solid #1e1e2c;border-radius:11px;padding:12px 13px;margin-bottom:9px}
         .seg{display:flex;background:#181820;border:1.5px solid #26263a;border-radius:11px;overflow:hidden}
@@ -234,8 +246,276 @@ export default function App() {
         @keyframes spin{to{transform:rotate(360deg)}}
         .skeleton{background:linear-gradient(90deg,#181820 25%,#222230 50%,#181820 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:10px}
         @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+        /* DESKTOP LAYOUT */
+        .desktop-layout{display:flex;height:100vh;overflow:hidden}
+        .sidebar{width:280px;min-width:280px;background:#0a0a0f;border-right:1px solid #16161f;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+        .sidebar-header{padding:20px 18px 16px;border-bottom:1px solid #16161f}
+        .sidebar-list{flex:1;overflow-y:auto;padding:10px}
+        .sidebar-list::-webkit-scrollbar{width:3px}
+        .sidebar-list::-webkit-scrollbar-thumb{background:#222}
+        .main-panel{flex:1;overflow-y:auto;background:#0c0c11}
+        .main-panel::-webkit-scrollbar{width:5px}
+        .main-panel::-webkit-scrollbar-thumb{background:#222}
+        .main-header{padding:18px 24px 14px;background:#0c0c11;border-bottom:1px solid #16161f;position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center}
+        .content-area{padding:20px 24px 40px}
+        .order-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+        .sidebar-card{background:#111119;border:1px solid #1e1e2c;border-radius:11px;padding:11px 12px;cursor:pointer;transition:all .15s;margin-bottom:6px}
+        .sidebar-card:hover{border-color:#7c6af7;background:#13131e}
+        .sidebar-card.active{border-color:#7c6af7;background:rgba(124,106,247,.08)}
+        .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+        @media(min-width:1200px){.detail-grid{grid-template-columns:1fr 1fr 1fr}}
       `}</style>
 
+      {/* ════════════════ DESKTOP LAYOUT ════════════════ */}
+      {isDesktop && <div className="desktop-layout">
+        {/* SIDEBAR */}
+        <div className="sidebar">
+          <div className="sidebar-header">
+            <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 16, fontWeight: 800, background: "linear-gradient(135deg,#a78bfa,#7c6af7)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>MG INTERNATIONAL</div>
+            <div style={{ fontSize: 9, color: "#363650", letterSpacing: ".1em", textTransform: "uppercase", marginTop: 2 }}>Textile Agent · Order Tracker</div>
+            {/* Stats */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 14 }}>
+              {[
+                { label: "Total",   val: orders.length,                                          color: "#a78bfa" },
+                { label: "Pending", val: orders.filter(o => getStatus(o) === "pending").length,   color: "#f59e0b" },
+                { label: "Transit", val: orders.filter(o => getStatus(o) === "partial").length,   color: "#3b82f6" },
+                { label: "Done",    val: orders.filter(o => getStatus(o) === "completed").length, color: "#10b981" },
+              ].map(s => (
+                <div key={s.label} style={{ background: "#111119", border: "1px solid #1e1e2c", borderRadius: 9, padding: "8px 6px", textAlign: "center" }}>
+                  <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 20, fontWeight: 800, color: s.color }}>{s.val}</div>
+                  <div style={{ fontSize: 9, color: "#363650", textTransform: "uppercase", letterSpacing: ".06em", marginTop: 1 }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+            {/* Filters */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 12 }}>
+              {["all","pending","partial","completed"].map(f => (
+                <button key={f} className={`chip${filter === f ? " on" : ""}`} onClick={() => setFilter(f)} style={{ fontSize: 11, padding: "4px 10px" }}>
+                  {f === "all" ? "All" : f === "partial" ? "In Transit" : f.charAt(0).toUpperCase() + f.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Order list in sidebar */}
+          <div className="sidebar-list">
+            {loading
+              ? [1,2,3,4].map(i => <div key={i} className="skeleton" style={{ height: 80, marginBottom: 6 }} />)
+              : filtered.length === 0
+                ? <div style={{ textAlign: "center", color: "#363650", padding: "40px 0", fontSize: 12 }}>No orders found</div>
+                : filtered.map(o => {
+                    const st  = getStatus(o);
+                    const tag = typeTag(o);
+                    const d   = getDispatched(o);
+                    const pct = Math.round(d / o.qty * 100);
+                    return (
+                      <div key={o.id} className={`sidebar-card${sel && sel.id === o.id ? " active" : ""}`} onClick={() => { setSel(o); setSelDisp(null); }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                          <div>
+                            <div style={{ display: "flex", gap: 5, alignItems: "center", marginBottom: 2 }}>
+                              <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 11, fontWeight: 800, color: "#a78bfa" }}>{o.id}</span>
+                              <span className="pill" style={{ background: tag.bg, color: tag.color, fontSize: 9, padding: "2px 6px" }}>{tag.label}</span>
+                            </div>
+                            <div style={{ fontSize: 13, fontWeight: 700 }}>{o.fabric}</div>
+                            <div style={{ fontSize: 10, color: "#444", marginTop: 1 }}>{o.seller} → {o.buyer}</div>
+                          </div>
+                          <span className="pill" style={{ background: SC[st].bg, color: SC[st].color, fontSize: 9, padding: "2px 7px" }}>{SC[st].label}</span>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#444", marginBottom: 4 }}>
+                          <span>{d.toLocaleString()} / {o.qty.toLocaleString()} {o.unit}</span>
+                          <span style={{ color: SC[st].color, fontWeight: 700 }}>{pct}%</span>
+                        </div>
+                        <div className="pbar"><div className="pfill" style={{ width: `${pct}%`, background: SC[st].color }} /></div>
+                      </div>
+                    );
+                  })
+            }
+          </div>
+        </div>
+
+        {/* MAIN PANEL */}
+        <div className="main-panel">
+          <div className="main-header">
+            <div>
+              {sel
+                ? <div>
+                    <div style={{ fontSize: 18, fontWeight: 800 }}>{sel.fabric} <span style={{ fontSize: 13, color: "#a78bfa", fontWeight: 700 }}>{sel.id}</span></div>
+                    <div style={{ fontSize: 11, color: "#555", marginTop: 2 }}>{sel.date} · {sel.seller} → {sel.buyer}</div>
+                  </div>
+                : <div style={{ fontSize: 16, fontWeight: 700, color: "#555" }}>Select an order from the left panel</div>
+              }
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={loadAll} style={{ background: "#181820", border: "1px solid #26263a", color: "#666", borderRadius: 9, padding: "8px 14px", fontSize: 13, cursor: "pointer" }}>↻ Refresh</button>
+              <button onClick={() => setShowOF(true)} style={{ background: "linear-gradient(135deg,#7c6af7,#a78bfa)", border: "none", borderRadius: 11, padding: "8px 18px", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ New Order</button>
+            </div>
+          </div>
+
+          <div className="content-area">
+            {!sel && !selDisp && (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", color: "#363650" }}>
+                <div style={{ fontSize: 64, marginBottom: 16 }}>📋</div>
+                <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 20, fontWeight: 800, marginBottom: 8 }}>No Order Selected</div>
+                <div style={{ fontSize: 14 }}>Click any order from the left panel to view details</div>
+                <button onClick={() => setShowOF(true)} style={{ marginTop: 20, background: "linear-gradient(135deg,#7c6af7,#a78bfa)", border: "none", borderRadius: 11, padding: "12px 24px", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>+ Create First Order</button>
+              </div>
+            )}
+
+            {/* ORDER DETAIL - DESKTOP */}
+            {sel && !selDisp && (() => {
+              const st  = getStatus(sel);
+              const d   = getDispatched(sel);
+              const rem = sel.qty - d;
+              const pct = Math.round(d / sel.qty * 100);
+              const tag = typeTag(sel);
+              return (
+                <div>
+                  {/* Top summary row */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 20 }}>
+                    {[
+                      { l: "Total Qty",   v: `${sel.qty.toLocaleString()} ${sel.unit}`,  color: "#a78bfa" },
+                      { l: "Dispatched",  v: `${d.toLocaleString()} ${sel.unit}`,         color: "#3b82f6" },
+                      { l: "Remaining",   v: `${rem.toLocaleString()} ${sel.unit}`,       color: rem > 0 ? "#f59e0b" : "#10b981" },
+                      { l: "Progress",    v: `${pct}%`,                                    color: SC[st].color },
+                    ].map(x => (
+                      <div key={x.l} style={{ background: "#111119", border: "1px solid #1e1e2c", borderRadius: 13, padding: "16px", textAlign: "center" }}>
+                        <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 26, fontWeight: 800, color: x.color }}>{x.v}</div>
+                        <div style={{ fontSize: 10, color: "#444", textTransform: "uppercase", letterSpacing: ".07em", marginTop: 4 }}>{x.l}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Progress bar */}
+                  <div style={{ background: "#111119", border: "1px solid #1e1e2c", borderRadius: 13, padding: "16px 20px", marginBottom: 20 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#555", marginBottom: 8 }}>
+                      <span>Dispatch Progress</span><span style={{ color: SC[st].color, fontWeight: 700 }}>{pct}%</span>
+                    </div>
+                    <div className="pbar" style={{ height: 10 }}>
+                      <div className="pfill" style={{ width: `${pct}%`, background: SC[st].color }} />
+                    </div>
+                  </div>
+
+                  {/* Order info grid */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginBottom: 20 }}>
+                    {[
+                      { l: sel.orderType === "own" && sel.ownType === "purchase" ? "Seller (Mill)" : "From (Seller)", v: sel.seller },
+                      { l: sel.orderType === "own" && sel.ownType === "sales" ? "Buyer (Mill)" : "To (Buyer)", v: sel.buyer },
+                      ...(sel.orderType === "own" && sel.ownType === "purchase" && sel.soldTo ? [{ l: "Sold To", v: sel.soldTo, accent: true }] : []),
+                      { l: "Rate", v: sel.rate ? `₹${sel.rate}/${sel.unit}` : "—" },
+                      ...(sel.paymentTerms ? [{ l: "Payment Terms", v: sel.paymentTerms }] : []),
+                      ...(sel.deliveryDays ? [{ l: "Delivery Days", v: `${sel.deliveryDays} days` }] : []),
+                    ].map(x => (
+                      <div key={x.l} style={{ background: "#181820", borderRadius: 10, padding: "12px 14px" }}>
+                        <div style={{ fontSize: 10, color: "#3e3e55", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: 4 }}>{x.l}</div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: x.accent ? "#10b981" : "#ddd" }}>{x.v}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {sel.remarks && (
+                    <div style={{ background: "#181820", borderRadius: 10, padding: "12px 14px", marginBottom: 20 }}>
+                      <div style={{ fontSize: 10, color: "#3e3e55", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: 4 }}>📝 Remarks</div>
+                      <div style={{ fontSize: 14, color: "#bbb", lineHeight: 1.6 }}>{sel.remarks}</div>
+                    </div>
+                  )}
+
+                  {/* Dispatches */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#555", textTransform: "uppercase", letterSpacing: ".08em" }}>Dispatches ({sel.dispatches.length})</div>
+                    {rem > 0 && (
+                      <button onClick={() => setShowDF(true)} style={{ background: "rgba(124,106,247,.14)", border: "1px solid #7c6af7", color: "#a78bfa", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Add Dispatch</button>
+                    )}
+                  </div>
+
+                  {sel.dispatches.length === 0
+                    ? <div style={{ textAlign: "center", color: "#363650", padding: "40px", background: "#111119", borderRadius: 13, border: "1px dashed #1e1e2c", fontSize: 14 }}>No dispatches recorded yet</div>
+                    : <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 12 }}>
+                        {sel.dispatches.map((d, i) => {
+                          const due = payDue(d.date, d.paymentDays);
+                          return (
+                            <div key={d.id || i} className="card" style={{ cursor: "pointer" }} onClick={() => setSelDisp(d)}>
+                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                  <span style={{ background: "rgba(167,139,250,.15)", color: "#a78bfa", borderRadius: 6, padding: "2px 8px", fontSize: 11, fontWeight: 700 }}>Lot {i + 1}</span>
+                                  <span style={{ fontSize: 15, fontWeight: 700 }}>{d.qty.toLocaleString()} {sel.unit}</span>
+                                </div>
+                                <span style={{ fontSize: 11, color: "#555" }}>{d.date}</span>
+                              </div>
+                              <div className="g2" style={{ gap: 6 }}>
+                                {d.invoiceNo  && <IB label="📋 Invoice No."  value={d.invoiceNo} accent />}
+                                {d.invoiceAmt && <IB label="💰 Amount"        value={`₹${Number(d.invoiceAmt).toLocaleString()}`} />}
+                                {d.lrNo       && <IB label="📄 LR No."        value={d.lrNo} />}
+                                {due          && <IB label="📅 Payment Due"   value={due} warn />}
+                              </div>
+                              <div style={{ marginTop: 8, fontSize: 11, color: "#444", textAlign: "right" }}>Click for full details →</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                  }
+                </div>
+              );
+            })()}
+
+            {/* DISPATCH DETAIL - DESKTOP */}
+            {selDisp && sel && (() => {
+              const lotNo = sel.dispatches.indexOf(selDisp) + 1;
+              const due   = payDue(selDisp.date, selDisp.paymentDays);
+              return (
+                <div>
+                  <button onClick={() => setSelDisp(null)} style={{ background: "#181820", border: "1px solid #26263a", color: "#888", borderRadius: 9, padding: "7px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer", marginBottom: 20 }}>← Back to Order</button>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+                    {/* Hero */}
+                    <div style={{ gridColumn: "1/-1", background: "rgba(124,106,247,.08)", border: "1px solid rgba(124,106,247,.2)", borderRadius: 14, padding: "18px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 16, fontWeight: 800, color: "#a78bfa", marginBottom: 4 }}>{sel.id} · Lot {lotNo}</div>
+                        <div style={{ fontSize: 20, fontWeight: 700 }}>{selDisp.qty.toLocaleString()} {sel.unit}</div>
+                        <div style={{ fontSize: 12, color: "#555", marginTop: 4 }}>{sel.fabric} · {selDisp.date}</div>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        {selDisp.invoiceAmt && <div style={{ fontSize: 28, fontWeight: 800, color: "#10b981" }}>₹{Number(selDisp.invoiceAmt).toLocaleString()}</div>}
+                        {due && <div style={{ marginTop: 8, background: "rgba(245,158,11,.1)", border: "1px solid rgba(245,158,11,.25)", borderRadius: 8, padding: "6px 14px" }}>
+                          <span style={{ fontSize: 11, color: "#888" }}>Due: </span>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b" }}>{due}</span>
+                        </div>}
+                      </div>
+                    </div>
+                    {/* Invoice */}
+                    <div className="sbox" style={{ margin: 0 }}>
+                      <SH icon="📋" t="Invoice Details" />
+                      <div className="g2">
+                        <IB label="Invoice No."  value={selDisp.invoiceNo}   accent />
+                        <IB label="Invoice Date" value={selDisp.invoiceDate} />
+                        <IB label="Invoice Amt"  value={selDisp.invoiceAmt ? `₹${Number(selDisp.invoiceAmt).toLocaleString()}` : null} />
+                        <IB label="Payment Days" value={selDisp.paymentDays ? `${selDisp.paymentDays} days` : null} warn />
+                      </div>
+                    </div>
+                    {/* Packing */}
+                    <div className="sbox" style={{ margin: 0 }}>
+                      <SH icon="📦" t="Packing Details" />
+                      <div className="g2">
+                        <IB label="Bags/Bundles/Thaan" value={selDisp.bags}    full />
+                        <IB label="Gross Weight"       value={selDisp.grossWt ? `${selDisp.grossWt} kg` : null} />
+                        <IB label="Net Weight"         value={selDisp.netWt   ? `${selDisp.netWt} kg`   : null} />
+                      </div>
+                    </div>
+                    {/* Transport */}
+                    <div className="sbox" style={{ margin: 0 }}>
+                      <SH icon="🚛" t="Transport Details" />
+                      <div className="g2">
+                        <IB label="Transporter" value={selDisp.transportName} full />
+                        <IB label="LR No."      value={selDisp.lrNo} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      </div>}
+
+      {/* ════════════════ MOBILE LAYOUT ════════════════ */}
+      {!isDesktop && <div id="mobile-view">
       {/* ── HEADER ── */}
       <div style={{ padding: "16px 15px 12px", background: "#0c0c11", position: "sticky", top: 0, zIndex: 10, borderBottom: "1px solid #16161f" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -664,9 +944,11 @@ export default function App() {
         </>
       )}
 
-      {/* Toast */}
+      </div>}
+
+      {/* Toast - always visible */}
       {toast && (
-        <div style={{ position: "fixed", bottom: 80, left: "50%", transform: "translateX(-50%)", background: toast.type === "success" ? "rgba(16,185,129,.15)" : toast.type === "error" ? "rgba(239,68,68,.15)" : "#181820", border: `1px solid ${toast.type === "success" ? "rgba(16,185,129,.4)" : toast.type === "error" ? "rgba(239,68,68,.4)" : "#2a2a3e"}`, color: toast.type === "success" ? "#10b981" : toast.type === "error" ? "#f87171" : "#e4e2ef", padding: "10px 18px", borderRadius: 10, fontSize: 13, fontWeight: 600, zIndex: 200, whiteSpace: "nowrap", boxShadow: "0 6px 24px rgba(0,0,0,.6)" }}>
+        <div style={{ position: "fixed", bottom: 30, left: "50%", transform: "translateX(-50%)", background: toast.type === "success" ? "rgba(16,185,129,.15)" : toast.type === "error" ? "rgba(239,68,68,.15)" : "#181820", border: `1px solid ${toast.type === "success" ? "rgba(16,185,129,.4)" : toast.type === "error" ? "rgba(239,68,68,.4)" : "#2a2a3e"}`, color: toast.type === "success" ? "#10b981" : toast.type === "error" ? "#f87171" : "#e4e2ef", padding: "10px 18px", borderRadius: 10, fontSize: 13, fontWeight: 600, zIndex: 200, whiteSpace: "nowrap", boxShadow: "0 6px 24px rgba(0,0,0,.6)" }}>
           {toast.m}
         </div>
       )}
